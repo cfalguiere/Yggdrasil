@@ -1,0 +1,24 @@
+{
+  "name": "Yggdrasil",
+  "version": "0.0.0",
+  "description": "complex dataset generator",
+  "main": "Yggdrasil.js",
+  "scripts": {
+    "test": "node_modules/.bin/jasmine-node spec"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/cfalguiere/Yggdrasil.git"
+  },
+  "keywords": [
+    "dataset"
+  ],
+  "author": "cfalguiere",
+  "license": "BSD-2-Clause",
+  "bugs": {
+    "url": "https://github.com/cfalguiere/Yggdrasil/issues"
+  },
+  "devDependencies": {
+    "jasmine-node": "~1.14.5"
+  }
+}
