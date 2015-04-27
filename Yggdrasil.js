@@ -1,6 +1,9 @@
 // TODO level 3
 // TODO check population is not exceeded for small population
-// TODO id generator
+// TODO ref in list
+// TODO deplacer l'id et gerer une collection d'ids à part
+// pick in a list in proportion of the item quantity
+// multiple - compute slice in proprotion of the sum and remove the loop on items
 
 
 // ---------
@@ -41,7 +44,7 @@ function verify(configuration) {
   return accept;
 }
 
-function verify2(configuration) {
+function verify2(configuration) { // same as verify with message
 
   var failures = [];
 
@@ -155,7 +158,7 @@ function pick(options) {
   return option;
 }
 
-function multiplePick(someLoopOptions, someOptions) {
+function multiplePickOld(someLoopOptions, someOptions) {
 
   function pick(options, excludeList) {
     var option = null;
@@ -188,16 +191,71 @@ function multiplePick(someLoopOptions, someOptions) {
   return selectedOptions;
 }
 
+function multiplePick(someLoopOptions, someOptions) {
+
+  function pick(options, excludeList) {
+    var option = null;
+    var max = options[options.length-1].threshold
+    var dice = Math.random() * max;
+    //console.log("==> jet:" + dice + " max:" + max);
+
+    var iOption = 0;
+    while (option == null && iOption<100) {
+      var pos = iOption % options.length;
+      //console.log("iOption:" + iOption + " pos:" + pos + " options[pos]: " + JSON.stringify(options[pos]));
+      var candidate = options[pos];
+      if (dice < candidate.threshold ) {
+        if ( excludeList.indexOf(candidate.code) < 0) {
+          option = candidate
+        } else {
+          dice = Math.random() * max;
+        }
+      }
+      iOption++;
+    }
+
+    return option;
+  }
+
+  var loop = pick(someLoopOptions, []);
+  var excludeList = [];
+  var selectedOptions = [];
+  for (var l=0; l<loop.count; l++) {
+    var option  = pick(someOptions, excludeList);
+    excludeList.push( option.code );
+    selectedOptions.push( option );
+  }
+
+  return selectedOptions;
+}
+
 function padDigits(number, digits) {
     return Array(Math.max(digits - String(number).length + 1, 0)).join(0) + number;
 }
 
-var idSequence = 0;
+
+//var idSequence = 0;
+function IdSequence (base) {
+    this.id = 0; // TODO gestion base
+    this.next = function() {
+        return this.id++;
+    };
+}
+
+var idSequences = [];
 function generateId(configuration) {
-  var next = idSequence++;
+  var fieldName = (configuration.field) ? configuration.field : configuration.name;
+  var seq = idSequences[fieldName];
+  if (seq == null) {
+    seq = new IdSequence(configuration.base);
+    idSequences[fieldName] = seq;
+  }
+  var next = seq.next();
+  //var next = iSeq++;
   if (configuration.base) {
     next += configuration.base;
   }
+  //console.log( next );
   if (configuration.length) {
     next = padDigits(next, configuration.length);
   }
@@ -237,6 +295,12 @@ function generate(configuration) {
       item.id = generateId(configuration.id);
     }
 
+    if (configuration.ids) {
+      configuration.ids.map( function (id) {
+        item[id.field] = generateId(id);
+      })
+    }
+
     items.push(item);
   }
 
@@ -253,7 +317,7 @@ function check(items, configuration) {
        configuration.loopOptions.map( function (loopOption) {
           var fieldName = (configuration.field) ? configuration.field : configuration.name;
           var group = items.filter( function(c) {
-            return c[fieldName].length;
+            return c[fieldName].length == loopOption.count;
           });
           var count = group.length
           console.log( "[" + configuration.name + "] count:" + loopOption.count + " expected:" + loopOption.population +
