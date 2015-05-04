@@ -200,10 +200,11 @@ function multiplePick(someLoopOptions, someOptions) {
     //console.log("==> jet:" + dice + " max:" + max);
 
     var iOption = 0;
-    while (option == null && iOption<100) {
+    while (option == null && iOption<200) {
       var pos = iOption % options.length;
       //console.log("iOption:" + iOption + " pos:" + pos + " options[pos]: " + JSON.stringify(options[pos]));
       var candidate = options[pos];
+      //console.log("==> candidate:" + JSON.stringify(candidate));
       if (dice < candidate.threshold ) {
         if ( excludeList.indexOf(candidate.code) < 0) {
           option = candidate
@@ -221,7 +222,9 @@ function multiplePick(someLoopOptions, someOptions) {
   var excludeList = [];
   var selectedOptions = [];
   for (var l=0; l<loop.count; l++) {
+    //console.log("==> loop:" + JSON.stringify(loop) + " options:" + someOptions.length);
     var option  = pick(someOptions, excludeList);
+    //console.log("==> option:" + JSON.stringify(option));
     excludeList.push( option.code );
     selectedOptions.push( option );
   }
